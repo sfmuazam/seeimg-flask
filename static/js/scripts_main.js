@@ -27,13 +27,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const uploadTab = document.getElementById('upload-tab');
     const historyTableBody = document.getElementById('history-table-body');
     const historyModal = document.getElementById('history-modal');
-    const modalCloseButton = document.getElementById('modal-close-button');
     const modalImage = document.getElementById('modal-image');
     const modalCaption = document.getElementById('modal-caption');
     const modalReplayCaption = document.getElementById('modal-replay-caption');
     const modalStopCaption = document.getElementById('modal-stop-caption');
     const modalDelete = document.getElementById('modal-delete');
-    const closeModal = document.getElementById('close-modal');
+    const modalCloseButton = document.getElementById('modal-close-button');
 
     let currentStream;
     let useFrontCamera = true;
@@ -412,7 +411,6 @@ document.addEventListener('DOMContentLoaded', () => {
         modalCaption.textContent = item.predicted_caption;
         currentModalIndex = index;
         historyModal.classList.remove('hidden');
-        stopSpeaking();
     };
 
     modalReplayCaption.addEventListener('click', () => {
@@ -424,22 +422,21 @@ document.addEventListener('DOMContentLoaded', () => {
         stopSpeaking();
     });
 
-    modalDelete.addEventListener('click', async () => {
-        const confirmed = confirm('Apakah Anda yakin ingin menghapus gambar ini?');
-        if (confirmed) {
-            await deleteHistory(currentModalIndex);
+    modalDelete.addEventListener('click', () => {
+        if (confirm('Apakah Anda yakin ingin menghapus gambar ini?')) {
+            deleteHistory(currentModalIndex);
             historyModal.classList.add('hidden');
         }
     });
 
     modalCloseButton.addEventListener('click', () => {
-        historyModal.classList.add('hidden');
         stopSpeaking();
+        historyModal.classList.add('hidden');
     });
 
     closeModal.addEventListener('click', () => {
-        historyModal.classList.add('hidden');
         stopSpeaking();
+        historyModal.classList.add('hidden');
     });
 
     async function deleteHistory(index) {
@@ -451,6 +448,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (response.ok) {
                 historyData.splice(index, 1);
                 populateHistoryTable();
+                historyModal.classList.add('hidden');
             } else {
                 console.error('Error deleting history:', response.statusText);
                 showToastError('Terjadi kesalahan saat menghapus riwayat gambar.');
@@ -461,13 +459,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Stop speaking when the page is reloaded or navigated away
-    window.addEventListener('beforeunload', stopSpeaking);
-    document.addEventListener('visibilitychange', () => {
-        if (document.hidden) {
+    document.addEventListener('click', (event) => {
+        if (event.target === historyModal) {
             stopSpeaking();
+            historyModal.classList.add('hidden');
         }
     });
+
+    window.addEventListener('beforeunload', stopSpeaking);
+    window.addEventListener('popstate', stopSpeaking);
 
     mainTab.click();
 });

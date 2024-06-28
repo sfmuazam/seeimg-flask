@@ -34,7 +34,13 @@ def upload_image():
     try:
         file_ext = secure_filename(file.filename).split('.')[-1]
         filename = f"{uuid.uuid4()}.{file_ext}"
-        file_path = os.path.join('static/uploads', filename)
+        upload_folder = 'static/uploads'
+        
+        # Ensure the upload directory exists
+        if not os.path.exists(upload_folder):
+            os.makedirs(upload_folder)
+        
+        file_path = os.path.join(upload_folder, filename)
         file.save(file_path)
         
         with open(file_path, 'rb') as f:
