@@ -111,4 +111,4 @@ dmypy.json
 .pyre/
 
 # Static files
-static/uploads/
+static/uploads/*
