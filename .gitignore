@@ -109,6 +109,3 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
-
-# Static files
-static/uploads/*
