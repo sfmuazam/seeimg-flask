@@ -33,7 +33,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalStopCaption = document.getElementById('modal-stop-caption');
     const modalDelete = document.getElementById('modal-delete');
     const modalCloseButton = document.getElementById('modal-close-button');
-    const closeModal = document.getElementById('close-modal');
 
     let currentStream;
     let useFrontCamera = true;
@@ -164,23 +163,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    async function initCamera() {
-        try {
-            currentStream = await navigator.mediaDevices.getUserMedia(constraints);
-            video.srcObject = currentStream;
-        } catch (error) {
-            console.error('Error accessing the camera: ', error);
-            alert('Tidak dapat mengakses kamera. Silakan periksa pengaturan browser Anda.');
-        }
-    }
-
-    function stopCamera() {
-        if (currentStream) {
-            currentStream.getTracks().forEach(track => track.stop());
-            currentStream = null;
-        }
-    }
-
     cameraTab.addEventListener('click', () => {
         cameraContainer.classList.remove('hidden');
         uploadContainer.classList.add('hidden');
@@ -207,6 +189,23 @@ document.addEventListener('DOMContentLoaded', () => {
         stopSpeechRecognition();
         fileInput.value = '';
     });
+
+    async function initCamera() {
+        try {
+            currentStream = await navigator.mediaDevices.getUserMedia(constraints);
+            video.srcObject = currentStream;
+        } catch (error) {
+            console.error('Error accessing the camera: ', error);
+            alert('Tidak dapat mengakses kamera. Silakan periksa pengaturan browser Anda.');
+        }
+    }
+
+    function stopCamera() {
+        if (currentStream) {
+            currentStream.getTracks().forEach(track => track.stop());
+            currentStream = null;
+        }
+    }
 
     captureButton.addEventListener('click', async () => {
         disableButtons(true);
@@ -412,6 +411,7 @@ document.addEventListener('DOMContentLoaded', () => {
         modalCaption.textContent = item.predicted_caption;
         currentModalIndex = index;
         historyModal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden'; // Prevent background scroll
     };
 
     modalReplayCaption.addEventListener('click', () => {
@@ -424,21 +424,23 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     modalDelete.addEventListener('click', () => {
-        const confirmDelete = confirm('Anda yakin ingin menghapus gambar ini?');
-        if (confirmDelete) {
+        if (confirm('Apakah Anda yakin ingin menghapus gambar ini?')) {
             deleteHistory(currentModalIndex);
             historyModal.classList.add('hidden');
+            document.body.style.overflow = 'auto'; // Re-enable background scroll
         }
     });
 
     modalCloseButton.addEventListener('click', () => {
         historyModal.classList.add('hidden');
+        document.body.style.overflow = 'auto'; // Re-enable background scroll
         stopSpeaking();
     });
 
     window.addEventListener('click', (event) => {
         if (event.target === historyModal) {
             historyModal.classList.add('hidden');
+            document.body.style.overflow = 'auto'; // Re-enable background scroll
             stopSpeaking();
         }
     });
@@ -463,4 +465,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     mainTab.click();
+
+    // Close modal on tab change, reload, or navigation
+    window.addEventListener('beforeunload', stopSpeaking);
+    window.addEventListener('popstate', stopSpeaking);
+
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'hidden') {
+            stopSpeaking();
+        }
+    });
 });
