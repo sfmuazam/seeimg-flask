@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block title %}Deskripsi Gambar Publik{% endblock %}
+
+{% block content %}
+<body class="bg-gray-100 flex flex-col min-h-screen">
+<!-- Navbar -->
+<nav class="bg-blue-500 text-white px-4 py-3 flex justify-between items-center">
+    <div class="text-lg font-semibold">Deskripsi Gambar Publik</div>
+    <a href="{{ url_for('auth.login') }}" class="text-white">Login</a>
+</nav>
+
+<!-- Main Content -->
+<div class="flex-grow flex flex-col items-center justify-center p-4">
+    <div class="w-full max-w-2xl"> 
+        <div class="flex mb-4">
+            <button id="camera-tab" class="w-1/2 bg-blue-500 text-white py-2 px-4 rounded-t-lg">Kamera</button>
+            <button id="upload-tab" class="w-1/2 bg-gray-300 py-2 px-4 rounded-t-lg">Unggah</button>
+        </div>
+        <div id="camera-container" class="flex flex-col items-center justify-center p-4 bg-white rounded-b-lg shadow-lg">
+            <video id="camera" autoplay class="w-full rounded-lg shadow-lg mb-4 max-h-96"></video> <!-- Tambahkan max-h-96 -->
+            <div class="flex space-x-4">
+                <button id="capture-button" class="bg-blue-500 text-white px-4 py-2 rounded shadow">Ambil Foto</button>
+                <button id="switch-camera" class="bg-gray-500 text-white px-4 py-2 rounded shadow">Ganti Kamera</button>
+            </div>
+        </div>
+        <div id="upload-container" class="hidden flex flex-col items-center justify-center p-4 bg-white rounded-b-lg shadow-lg">
+            <input type="file" id="file-input" accept=".jpg,.jpeg,.png,.webp" class="mb-4">
+            <button id="upload-button" class="bg-blue-500 text-white px-4 py-2 rounded shadow">Unggah</button>
+        </div>
+        <div id="result-container" class="hidden flex flex-col items-center justify-center p-4 bg-white rounded-lg shadow-lg mt-4">
+            <img id="captured-image" alt="Gambar yang Diambil" class="w-full rounded-lg shadow-lg mb-4">
+            <p id="caption" class="text-lg font-semibold text-center mb-4"></p>
+            <div class="flex space-x-4">
+                <button id="replay-caption-button" class="bg-green-500 text-white px-4 py-2 rounded shadow">Putar Ulang</button>
+                <button id="stop-caption-button" class="bg-gray-500 text-white px-4 py-2 rounded shadow">Hentikan Suara</button>
+                <button id="close-button" class="bg-red-500 text-white px-4 py-2 rounded shadow">Tutup</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+    <script src="{{ url_for('static', filename='js/scripts_index.js') }}"></script>
+{% endblock %}
