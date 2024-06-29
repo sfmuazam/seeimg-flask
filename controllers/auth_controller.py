@@ -36,7 +36,6 @@ def register():
         if password != confirm_password:
             flash('Password dan konfirmasi password tidak sama.')
         else:
-            # Menggunakan metode hash yang valid untuk membuat hash password
             hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
             new_user = Users(username=username, password=hashed_password)
             db.session.add(new_user)

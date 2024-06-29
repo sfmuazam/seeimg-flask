@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let recognition;
     let selectedVoice;
 
-    let currentMode = 'camera';  // Variable to keep track of current mode
+    let currentMode = 'camera';  
 
     const isAndroid = /android/i.test(navigator.userAgent);
     const initialFacingMode = isAndroid ? 'environment' : 'user';

@@ -8,32 +8,15 @@ from PIL import UnidentifiedImageError
 from flask import Blueprint, request, jsonify, current_app
 from werkzeug.utils import secure_filename
 from flask_login import login_required, current_user
-from utils import load_image_from_file, evaluate_beam_search, correct_caption, VALID_IMAGE_FORMATS
+from utils import load_image_from_file, evaluate_beam_search, correct_caption, get_gemini_caption, VALID_IMAGE_FORMATS
 from extensions import db
 from models import Images
 from collections import Counter
 
-# Setup logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 images = Blueprint('images', __name__)
-
-def get_gemini_caption(imgbb_url, corrected_caption):
-    gemini_response = requests.get(
-        'https://api.nyxs.pw/ai/gemini-img',
-        params={
-            'url': imgbb_url,
-            'text': f'Deskripsikan gambar ini tanpa menuliskan "Gambar ini menunjukkan" atau sejenisnya. Jika ini adalah salah satu dari lima tempat wisata berikut: Dlas, Owabong, Sanggaluri, Purbasari, atau Golaga (Goa Lawa), pertimbangkan deskripsi berikut: {corrected_caption}. Jika Iya, gunakan atau gabungkan dengan deskripsi yang dihasilkan. Jika ada yang tidak sesuai, abaikan. Jika bukan dari lima tempat tersebut, buat deskripsi sendiri tanpa mengikuti deskripsi yang diberikan model.'
-        }
-    )
-    
-    if gemini_response.status_code != 200:
-        logger.error("Gagal mendapatkan deskripsi dari API Gemini")
-        return None
-    
-    gemini_data = gemini_response.json()
-    return gemini_data.get('result', corrected_caption)
 
 @images.route('/images', methods=['POST'])
 @login_required
@@ -54,14 +37,12 @@ def upload_image():
         filename = f"{uuid.uuid4()}.{file_ext}"
         upload_folder = 'static/uploads'
         
-        # Ensure the upload directory exists
         if not os.path.exists(upload_folder):
             os.makedirs(upload_folder)
         
         file_path = os.path.join(upload_folder, filename)
         file.save(file_path)
         
-        # Generate local caption
         with open(file_path, 'rb') as f:
             image_tensor = load_image_from_file(f)
         
@@ -69,14 +50,13 @@ def upload_image():
         caption = ' '.join([word for word in caption if word != "<unk>"])
         corrected_caption = correct_caption(caption)
         
-        # Upload the image to Imgbb
         imgbb_api_key = current_app.config['IMGBB_API_KEY']
         with open(file_path, 'rb') as f:
             imgbb_response = requests.post(
                 'https://api.imgbb.com/1/upload',
                 params={
                     'key': imgbb_api_key,
-                    'expiration': 120
+                    'expiration': 75
                 },
                 files={
                     'image': f
@@ -91,19 +71,16 @@ def upload_image():
         imgbb_url = imgbb_data['data']['url']
         delete_url = imgbb_data['data']['delete_url']
 
-        # Rerun and Averaging
         captions = []
-        for _ in range(3):  # Number of reruns
+        for _ in range(3):  
             result = get_gemini_caption(imgbb_url, corrected_caption)
             if result:
                 captions.append(result)
         
         most_common_caption = Counter(captions).most_common(1)[0][0] if captions else corrected_caption
 
-        # Delete the image from Imgbb
         requests.delete(delete_url)
 
-        # Save image data to database
         wib = pytz.timezone('Asia/Jakarta')
         upload_date = datetime.datetime.now(wib)
 
@@ -155,11 +132,9 @@ def delete_image(image_id):
             logger.error("Gambar tidak ditemukan atau pengguna tidak diizinkan")
             return jsonify({"error": "Gambar tidak ditemukan atau pengguna tidak diizinkan"}), 404
         
-        # Delete the image file from the system
         if os.path.exists(image.image_path):
             os.remove(image.image_path)
         
-        # Delete the image record from the database
         db.session.delete(image)
         db.session.commit()
 

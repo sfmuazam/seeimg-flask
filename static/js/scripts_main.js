@@ -132,7 +132,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Populate voices when they change
     speechSynthesis.addEventListener('voiceschanged', populateVoiceList);
 
     testVoiceButton.addEventListener('click', () => {
@@ -412,7 +411,7 @@ document.addEventListener('DOMContentLoaded', () => {
         modalCaption.textContent = item.predicted_caption;
         currentModalIndex = index;
         historyModal.classList.remove('hidden');
-        document.body.style.overflow = 'hidden'; // Prevent background scroll
+        document.body.style.overflow = 'hidden'; 
     };
 
     modalReplayCaption.addEventListener('click', () => {
@@ -428,20 +427,20 @@ document.addEventListener('DOMContentLoaded', () => {
         if (confirm('Apakah Anda yakin ingin menghapus gambar ini?')) {
             deleteHistory(currentModalIndex);
             historyModal.classList.add('hidden');
-            document.body.style.overflow = 'auto'; // Re-enable background scroll
+            document.body.style.overflow = 'auto';
         }
     });
 
     modalCloseButton.addEventListener('click', () => {
         historyModal.classList.add('hidden');
-        document.body.style.overflow = 'auto'; // Re-enable background scroll
+        document.body.style.overflow = 'auto'; 
         stopSpeaking();
     });
 
     window.addEventListener('click', (event) => {
         if (event.target === historyModal) {
             historyModal.classList.add('hidden');
-            document.body.style.overflow = 'auto'; // Re-enable background scroll
+            document.body.style.overflow = 'auto'; 
             stopSpeaking();
         }
     });
@@ -467,7 +466,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     mainTab.click();
 
-    // Close modal on tab change, reload, or navigation
     window.addEventListener('beforeunload', stopSpeaking);
     window.addEventListener('popstate', stopSpeaking);
 

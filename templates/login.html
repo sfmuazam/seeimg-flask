@@ -10,7 +10,7 @@
     <form id="login-form" method="POST" action="{{ url_for('auth.login') }}">
         <div class="mb-4">
             <label for="username" class="block text-sm font-medium text-gray-700">Username</label>
-            <input type="text" id="username" name="username" class="w-full p-2 border rounded" required>
+            <input type="text" id="username" name="username" class="w-full p-2 border rounded" required autofocus>
         </div>
         <div class="mb-4">
             <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
@@ -20,8 +20,4 @@
     </form>
     <p class="mt-4 text-center text-sm">Belum punya akun? <a href="{{ url_for('auth.register') }}" class="text-blue-500">Daftar di sini</a></p>
 </div>
-{% endblock %}
-
-{% block scripts %}
-    <script src="{{ url_for('static', filename='js/scripts_login.js') }}"></script>
 {% endblock %}

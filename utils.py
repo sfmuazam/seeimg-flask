@@ -260,6 +260,7 @@ row_size = 8
 col_size = 8
 target_vocab_size = top_k + 1
 dropout_rate = 0.1
+batch_size = 16
 
 # Initialize the Transformer model
 transformer = Transformer(
@@ -287,20 +288,23 @@ VALID_IMAGE_FORMATS = {"image/jpeg", "image/png", "image/webp", "jpg", "jpeg", "
 
 def load_image_from_file(file):
     try:
-        img = PILImage.open(BytesIO(file.read()))
+        # Cek format gambar
+        file_content = file.read()
+
+        img = PILImage.open(BytesIO(file_content))
         if img.format.lower() not in VALID_IMAGE_FORMATS:
-            raise ValueError("Invalid image format")
+            raise ValueError("Format gambar tidak valid")
         
-        if img.mode != 'RGB':
-            img = img.convert('RGB')
-        
-        img = img.resize((224, 224))
+        # Baca dan proses gambar
+        img = tf.io.decode_jpeg(file_content, channels=3)
+        img = tf.image.resize(img, (224, 224), method=tf.image.ResizeMethod.GAUSSIAN)
         img = np.array(img)
         img = tf.keras.applications.resnet_v2.preprocess_input(img)
         img = np.expand_dims(img, axis=0)
         return img
     except UnidentifiedImageError:
-        raise ValueError("Invalid image file")
+        raise ValueError("File gambar tidak valid")
+
 
 def create_masks_decoder(tar: tf.Tensor) -> tf.Tensor:
     look_ahead_mask = create_look_ahead_mask(tf.shape(tar)[1])
@@ -358,3 +362,18 @@ def correct_caption(caption: str) -> str:
         return corrected_caption.strip('"')
     else:
         raise ValueError("Failed to correct caption")
+    
+def get_gemini_caption(imgbb_url, corrected_caption):
+    gemini_response = requests.get(
+        'https://api.nyxs.pw/ai/gemini-img',
+        params={
+            'url': imgbb_url,
+            'text': f'Deskripsikan gambar ini dengan detail tanpa menuliskan "Gambar ini menunjukkan" atau sejenisnya. Jika ini adalah salah satu dari lima tempat wisata berikut: Dlas, Owabong, Sanggaluri, Purbasari, atau Golaga (Goa Lawa), pertimbangkan deskripsi berikut: {corrected_caption}. Jika Iya, gunakan atau gabungkan dengan deskripsi yang dihasilkan. Jika ada yang tidak sesuai, abaikan. Jika bukan dari lima tempat tersebut, buat deskripsi sendiri tanpa mengikuti deskripsi yang diberikan model.'
+        }
+    )
+    
+    if gemini_response.status_code != 200:
+        return None
+    
+    gemini_data = gemini_response.json()
+    return gemini_data.get('result', corrected_caption)

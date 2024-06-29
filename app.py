@@ -2,7 +2,7 @@ from flask import Flask, render_template, redirect, url_for
 from config import Config
 from extensions import db, login_manager
 from models import Users
-from flask_login import LoginManager, login_required, current_user
+from flask_login import login_required, current_user
 
 app = Flask(__name__)
 app.config.from_object(Config)
