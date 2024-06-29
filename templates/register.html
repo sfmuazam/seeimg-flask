@@ -1,10 +1,11 @@
 {% extends 'base.html' %}
 
-{% block title %}Register{% endblock %}
+{% block title %}Daftar{% endblock %}
 
 {% block content %}
 <body class="bg-gray-100 flex items-center justify-center min-h-screen">
 <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-sm">
+    <a href="{{ url_for('index') }}" class="text-blue-500 mb-4 inline-block">← Kembali ke Halaman Awal</a>
     <h1 class="text-2xl font-semibold mb-4">Daftar</h1>
     <form id="register-form" method="POST" action="{{ url_for('auth.register') }}">
         <div class="mb-4">
