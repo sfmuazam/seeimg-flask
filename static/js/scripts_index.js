@@ -7,6 +7,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const uploadContainer = document.getElementById('upload-container');
     const fileInput = document.getElementById('file-input');
     const uploadButton = document.getElementById('upload-button');
+    const filePreview = document.getElementById('file-preview');
+    const loadingCapture = document.getElementById('loading-capture');
+    const loadingUpload = document.getElementById('loading-upload');
     const capturedImage = document.getElementById('captured-image');
     const caption = document.getElementById('caption');
     const replayCaptionButton = document.getElementById('replay-caption-button');
@@ -29,8 +32,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const constraints = {
         video: {
             facingMode: initialFacingMode,
-            width: { ideal: 1280 },  
-            height: { ideal: 720 } 
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
         }
     };
 
@@ -61,6 +64,21 @@ document.addEventListener('DOMContentLoaded', () => {
         stopCamera();
         stopSpeechRecognition();
         fileInput.value = '';
+        filePreview.classList.add('hidden');
+    });
+
+    fileInput.addEventListener('change', () => {
+        const file = fileInput.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = () => {
+                filePreview.src = reader.result;
+                filePreview.classList.remove('hidden');
+            };
+            reader.readAsDataURL(file);
+        } else {
+            filePreview.classList.add('hidden');
+        }
     });
 
     async function initCamera() {
@@ -82,7 +100,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     captureButton.addEventListener('click', async () => {
         disableButtons(true);
-        captureButton.textContent = 'Memproses...';
+        captureButton.innerHTML = 'Memproses... <svg class="animate-spin h-5 w-5 text-white inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zM2 12a10 10 0 0110-10v2A8 8 0 004 12H2zm20 0a8 8 0 01-8 8v2c6.627 0 12-5.373 12-12h-4zm-2 0a10 10 0 01-10 10v-2a8 8 0 008-8h2z"></path></svg>';
 
         const canvas = document.createElement('canvas');
         canvas.width = video.videoWidth;
@@ -99,7 +117,7 @@ document.addEventListener('DOMContentLoaded', () => {
         await uploadImageAndGetCaption(imageData, 'camera');
 
         disableButtons(false);
-        captureButton.textContent = 'Ambil Foto';
+        captureButton.innerHTML = 'Ambil Foto';
     });
 
     switchCameraButton.addEventListener('click', () => {
@@ -120,7 +138,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         disableButtons(true);
-        uploadButton.textContent = 'Memproses...';
+        uploadButton.innerHTML = 'Memproses... <svg class="animate-spin h-5 w-5 text-white inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zM2 12a10 10 0 0110-10v2A8 8 0 004 12H2zm20 0a8 8 0 01-8 8v2c6.627 0 12-5.373 12-12h-4zm-2 0a10 10 0 01-10 10v-2a8 8 0 008-8h2z"></path></svg>';
 
         const reader = new FileReader();
         reader.onloadend = async () => {
@@ -128,6 +146,9 @@ document.addEventListener('DOMContentLoaded', () => {
             capturedImage.src = imageData;
 
             await uploadImageAndGetCaption(imageData, 'upload');
+
+            disableButtons(false);
+            uploadButton.innerHTML = 'Unggah';
         };
         reader.readAsDataURL(file);
     });
@@ -179,8 +200,8 @@ document.addEventListener('DOMContentLoaded', () => {
             showToastError('Terjadi kesalahan saat mengunggah gambar.');
         } finally {
             disableButtons(false);
-            captureButton.textContent = 'Ambil Foto';
-            uploadButton.textContent = 'Unggah';
+            captureButton.innerHTML = 'Ambil Foto';
+            uploadButton.innerHTML = 'Unggah';
         }
     }
 

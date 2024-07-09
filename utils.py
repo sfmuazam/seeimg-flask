@@ -1,5 +1,6 @@
 import os
 import numpy as np
+import logging
 import tensorflow as tf
 from tensorflow.keras.applications import ResNet50V2
 from tensorflow.keras.layers import Dense, LayerNormalization, Dropout, Embedding
@@ -8,6 +9,10 @@ from PIL import Image as PILImage, UnidentifiedImageError
 from io import BytesIO
 import requests
 import pickle
+import re
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # Initialize and load models
 image_model = ResNet50V2(include_top=False, weights='imagenet')
@@ -353,27 +358,39 @@ def evaluate_beam_search(image_tensor, beam_width=3):
 
     return result, tf.squeeze(output, axis=0), attention_weights
 
-def correct_caption(caption: str) -> str:
+def correct_caption(caption):
     url = "https://api.nyxs.pw/ai/gpt4"
     query_params = {"text": f"Perbaiki teks berikut dan tambahkan tanda baca yang sesuai: \"{caption}\""}
-    response = requests.get(url, params=query_params)
-    if response.status_code == 200:
-        corrected_caption = response.json().get("result", caption)
-        return corrected_caption.strip('"')
-    else:
-        raise ValueError("Failed to correct caption")
-    
+    try:
+        response = requests.get(url, params=query_params)
+        if response.status_code == 200:
+            corrected_caption = response.json().get("result", caption)
+            return corrected_caption.strip('"')
+        else:
+            logger.error("Failed to correct caption, using original caption")
+            return caption
+    except Exception as e:
+        logger.error(f"Kesalahan saat mengoreksi caption: {str(e)}")
+        return caption
+
 def get_gemini_caption(imgbb_url, corrected_caption):
-    gemini_response = requests.get(
-        'https://api.nyxs.pw/ai/gemini-img',
-        params={
-            'url': imgbb_url,
-            'text': f'Deskripsikan gambar ini dengan detail tanpa menuliskan "Gambar ini menunjukkan" atau sejenisnya. Jika ini adalah salah satu dari lima tempat wisata berikut: Dlas, Owabong, Sanggaluri, Purbasari, atau Golaga (Goa Lawa), pertimbangkan deskripsi berikut: {corrected_caption}. Jika Iya, gunakan atau gabungkan dengan deskripsi yang dihasilkan. Jika ada yang tidak sesuai, abaikan. Jika bukan dari lima tempat tersebut, buat deskripsi sendiri tanpa mengikuti deskripsi yang diberikan model.'
-        }
-    )
-    
-    if gemini_response.status_code != 200:
-        return None
-    
-    gemini_data = gemini_response.json()
-    return gemini_data.get('result', corrected_caption)
+    try:
+        gemini_response = requests.get(
+            'https://api.nyxs.pw/ai/gemini-img',
+            params={
+                'url': imgbb_url,
+                'text': f'Deskripsikan gambar ini dengan detail menggunakan Bahasa Indonesia tanpa menuliskan "Gambar ini menunjukkan" atau sejenisnya. Jika ini adalah salah satu dari lima tempat wisata berikut: Dlas, Owabong, Sanggaluri, Purbasari, atau Golaga (Goa Lawa), pertimbangkan deskripsi berikut: {corrected_caption}. Jika Iya, gunakan atau gabungkan dengan deskripsi yang dihasilkan dan sebut nama objek wisatanya. Jika ada yang tidak sesuai, abaikan. Jika bukan dari lima tempat tersebut, buat deskripsi sendiri tanpa mengikuti deskripsi yang diberikan model.'
+            }
+        )
+        
+        if gemini_response.status_code == 200:
+            gemini_data = gemini_response.json()
+            gemini_data = gemini_data.get('result', corrected_caption)
+            result = re.sub(r'_([^_]*)_', r'\1', gemini_data)
+            return result
+        else:
+            logger.error("Failed to get Gemini caption, using corrected caption")
+            return corrected_caption
+    except Exception as e:
+        logger.error(f"Kesalahan saat mendapatkan caption Gemini: {str(e)}")
+        return corrected_caption

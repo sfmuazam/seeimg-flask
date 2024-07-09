@@ -17,6 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const cameraContainer = document.getElementById('camera-container');
     const uploadContainer = document.getElementById('upload-container');
     const fileInput = document.getElementById('file-input');
+    const filePreview = document.getElementById('file-preview');
     const uploadButton = document.getElementById('upload-button');
     const capturedImage = document.getElementById('captured-image');
     const caption = document.getElementById('caption');
@@ -47,7 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
             "Januari", "Februari", "Maret", "April", "Mei", "Juni",
             "Juli", "Agustus", "September", "Oktober", "November", "Desember"
         ];
-        
+
         const date = new Date(dateString);
         const utcDay = date.getUTCDate();
         const utcMonth = date.getUTCMonth();
@@ -56,9 +57,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const utcMinutes = date.getUTCMinutes().toString().padStart(2, '0');
         const utcSeconds = date.getUTCSeconds().toString().padStart(2, '0');
         const month = bulan[utcMonth];
-    
+
         return `${utcDay} ${month} ${utcYear} ${utcHours}:${utcMinutes}:${utcSeconds}`;
-    }    
+    }
 
     navbarToggle.addEventListener('click', () => {
         navbarMenu.classList.toggle('hidden');
@@ -108,7 +109,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        const voices = speechSynthesis.getVoices().filter(voice => voice.lang.startsWith('id'));
+        const voices = speechSynthesis.getVoices().filter(voice => voice.lang.includes('id') || voice.lang.includes('Indonesian') || voice.lang.includes('Indonesia') || voice.lang.includes('ID') || voice.lang.includes('indonesia'));
         voiceSelect.innerHTML = '';
 
         voices.forEach(voice => {
@@ -188,6 +189,21 @@ document.addEventListener('DOMContentLoaded', () => {
         stopCamera();
         stopSpeechRecognition();
         fileInput.value = '';
+        filePreview.classList.add('hidden');
+    });
+
+    fileInput.addEventListener('change', () => {
+        const file = fileInput.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = () => {
+                filePreview.src = reader.result;
+                filePreview.classList.remove('hidden');
+            };
+            reader.readAsDataURL(file);
+        } else {
+            filePreview.classList.add('hidden');
+        }
     });
 
     async function initCamera() {
@@ -209,7 +225,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     captureButton.addEventListener('click', async () => {
         disableButtons(true);
-        captureButton.textContent = 'Memproses...';
+        captureButton.innerHTML = 'Memproses... <svg class="animate-spin h-5 w-5 text-white inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zM2 12a10 10 0 0110-10v2A8 8 0 004 12H2zm20 0a8 8 0 01-8 8v2c6.627 0 12-5.373 12-12h-4zm-2 0a10 10 0 01-10 10v-2a8 8 0 008-8h2z"></path></svg>';
 
         const canvas = document.createElement('canvas');
         canvas.width = video.videoWidth;
@@ -226,7 +242,7 @@ document.addEventListener('DOMContentLoaded', () => {
         await uploadImageAndGetCaption(imageData, 'camera');
 
         disableButtons(false);
-        captureButton.textContent = 'Ambil Foto';
+        captureButton.innerHTML = 'Ambil Foto';
     });
 
     switchCameraButton.addEventListener('click', () => {
@@ -247,7 +263,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         disableButtons(true);
-        uploadButton.textContent = 'Memproses...';
+        uploadButton.innerHTML = 'Memproses... <svg class="animate-spin h-5 w-5 text-white inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zM2 12a10 10 0 0110-10v2A8 8 0 004 12H2zm20 0a8 8 0 01-8 8v2c6.627 0 12-5.373 12-12h-4zm-2 0a10 10 0 01-10 10v-2a8 8 0 008-8h2z"></path></svg>';
 
         const reader = new FileReader();
         reader.onloadend = async () => {
@@ -255,6 +271,9 @@ document.addEventListener('DOMContentLoaded', () => {
             capturedImage.src = imageData;
 
             await uploadImageAndGetCaption(imageData, 'upload');
+
+            disableButtons(false);
+            uploadButton.innerHTML = 'Unggah';
         };
         reader.readAsDataURL(file);
     });
@@ -304,10 +323,6 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) {
             console.error('Error:', error);
             showToastError(`Terjadi kesalahan saat mengunggah gambar: ${error.message}`);
-        } finally {
-            disableButtons(false);
-            captureButton.textContent = 'Ambil Foto';
-            uploadButton.textContent = 'Unggah';
         }
     }
 
@@ -433,7 +448,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     modalCloseButton.addEventListener('click', () => {
         historyModal.classList.add('hidden');
-        document.body.style.overflow = 'auto'; 
+        document.body.style.overflow = 'auto';
         stopSpeaking();
     });
 

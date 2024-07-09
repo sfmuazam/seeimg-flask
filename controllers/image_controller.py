@@ -4,14 +4,14 @@ import logging
 import uuid
 import pytz
 import requests
-from PIL import UnidentifiedImageError
+from PIL import Image, UnidentifiedImageError
 from flask import Blueprint, request, jsonify, current_app
 from werkzeug.utils import secure_filename
 from flask_login import login_required, current_user
 from utils import load_image_from_file, evaluate_beam_search, correct_caption, get_gemini_caption, VALID_IMAGE_FORMATS
 from extensions import db
 from models import Images
-from collections import Counter
+from bs4 import BeautifulSoup
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -33,67 +33,73 @@ def upload_image():
         return jsonify({"error": "Format gambar tidak valid"}), 400
     
     try:
+        # Simpan file asli untuk analisis model
         file_ext = secure_filename(file.filename).split('.')[-1]
-        filename = f"{uuid.uuid4()}.{file_ext}"
+        original_filename = f"{uuid.uuid4()}.{file_ext}"
         upload_folder = 'static/uploads'
         
         if not os.path.exists(upload_folder):
             os.makedirs(upload_folder)
         
-        file_path = os.path.join(upload_folder, filename)
-        file.save(file_path)
+        original_file_path = os.path.join(upload_folder, original_filename)
+        file.save(original_file_path)
         
-        with open(file_path, 'rb') as f:
+        # Load image for model analysis using the original file path
+        with open(original_file_path, 'rb') as f:
             image_tensor = load_image_from_file(f)
         
         caption, _, _ = evaluate_beam_search(image_tensor)
         caption = ' '.join([word for word in caption if word != "<unk>"])
+        
         corrected_caption = correct_caption(caption)
         
-        imgbb_api_key = current_app.config['IMGBB_API_KEY']
-        with open(file_path, 'rb') as f:
-            imgbb_response = requests.post(
-                'https://api.imgbb.com/1/upload',
-                params={
-                    'key': imgbb_api_key,
-                    'expiration': 75
-                },
-                files={
-                    'image': f
-                }
-            )
+        # Konversi gambar ke format WebP dan simpan untuk penyimpanan yang efisien
+        webp_filename = f"{uuid.uuid4()}.webp"
+        webp_file_path = os.path.join(upload_folder, webp_filename)
         
-        if imgbb_response.status_code != 200:
-            logger.error("Gagal mengunggah gambar ke Imgbb")
-            return jsonify({"error": "Gagal mengunggah gambar ke Imgbb"}), 500
+        with Image.open(original_file_path) as img:
+            img = img.convert('RGB')
+            img.save(webp_file_path, format="webp")
         
-        imgbb_data = imgbb_response.json()
-        imgbb_url = imgbb_data['data']['url']
-        delete_url = imgbb_data['data']['delete_url']
+        # Upload the image to Nyxs Uploader
+        with open(original_file_path, 'rb') as f:
+            files = {'file': (file.filename, f, file.content_type)}
+            response = requests.post('https://uploader.nyxs.pw/upload', files=files)
 
-        captions = []
-        for _ in range(3):  
-            result = get_gemini_caption(imgbb_url, corrected_caption)
-            if result:
-                captions.append(result)
-        
-        most_common_caption = Counter(captions).most_common(1)[0][0] if captions else corrected_caption
+        img_url = None
 
-        requests.delete(delete_url)
+        if response.status_code == 200:
+            # Parsing HTML response to extract the URL
+            soup = BeautifulSoup(response.content, 'html.parser')
+            url_tag = soup.find('a')
+            
+            if url_tag and url_tag.get('href'):
+                img_url = url_tag.get('href')
+            else:
+                logger.error("URL tidak ditemukan dalam respons")
+        else:
+            logger.error("Gagal mengunggah gambar ke uploader.nyxs.pw")
+        
+        # If upload is successful and img_url is not None, get the Gemini caption
+        if img_url:
+            gemini_caption = get_gemini_caption(img_url, corrected_caption)
+            final_caption = gemini_caption if gemini_caption else corrected_caption
+        else:
+            final_caption = corrected_caption
 
         wib = pytz.timezone('Asia/Jakarta')
         upload_date = datetime.datetime.now(wib)
 
         new_image = Images(
             user_id=current_user.id, 
-            image_path=file_path, 
-            predicted_caption=most_common_caption, 
+            image_path=webp_file_path, 
+            predicted_caption=final_caption, 
             upload_date=upload_date
         )
         db.session.add(new_image)
         db.session.commit()
 
-        return jsonify({"caption": most_common_caption})
+        return jsonify({"caption": final_caption})
     except UnidentifiedImageError:
         logger.error("File gambar tidak valid")
         return jsonify({"error": "File gambar tidak valid"}), 400

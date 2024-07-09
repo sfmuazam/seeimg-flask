@@ -12,19 +12,20 @@
 
 <!-- Main Content -->
 <div class="flex-grow flex flex-col items-center justify-center p-4">
-    <div class="w-full max-w-2xl"> 
+    <div class="w-full max-w-2xl">
         <div class="flex mb-4">
             <button id="camera-tab" class="w-1/2 bg-blue-500 text-white py-2 px-4 rounded-t-lg">Kamera</button>
             <button id="upload-tab" class="w-1/2 bg-gray-300 py-2 px-4 rounded-t-lg">Unggah</button>
         </div>
         <div id="camera-container" class="flex flex-col items-center justify-center p-4 bg-white rounded-b-lg shadow-lg">
-            <video id="camera" autoplay class="w-full rounded-lg shadow-lg mb-4 max-h-96"></video> 
+            <video id="camera" autoplay class="w-full rounded-lg shadow-lg mb-4"></video>
             <div class="flex space-x-4">
                 <button id="capture-button" class="bg-blue-500 text-white px-4 py-2 rounded shadow">Ambil Foto</button>
                 <button id="switch-camera" class="bg-gray-500 text-white px-4 py-2 rounded shadow">Ganti Kamera</button>
             </div>
         </div>
         <div id="upload-container" class="hidden flex flex-col items-center justify-center p-4 bg-white rounded-b-lg shadow-lg">
+            <img id="file-preview" alt="Preview Gambar" class="w-full rounded-lg shadow-lg mb-4 hidden">
             <input type="file" id="file-input" accept=".jpg,.jpeg,.png,.webp" class="mb-4">
             <button id="upload-button" class="bg-blue-500 text-white px-4 py-2 rounded shadow">Unggah</button>
         </div>
