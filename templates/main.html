@@ -13,11 +13,14 @@
                 <li><a href="#" id="main-tab" class="block py-2 px-4 text-white">Halaman Utama</a></li>
                 <li><a href="#" id="settings-tab" class="block py-2 px-4 text-white">Pengaturan</a></li>
                 <li><a href="#" id="history-tab" class="block py-2 px-4 text-white">Riwayat Prediksi</a></li>
-                <li><a href="{{ url_for('auth.logout') }}" id="logout-tab" class="block py-2 px-4 text-white">Logout</a></li>
+                <li><a href="{{ url_for('auth.logout') }}" id="logout-tab" class="block py-2 px-4 text-white">Logout</a>
+                </li>
             </ul>
             <div id="mobile-nav" class="dropdown md:hidden" data-open="false">
                 <button id="navbar-toggle" type="button">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-menu">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round" class="lucide lucide-menu">
                         <line x1="4" x2="20" y1="12" y2="12" />
                         <line x1="4" x2="20" y1="6" y2="6" />
                         <line x1="4" x2="20" y1="18" y2="18" />
@@ -25,16 +28,20 @@
                 </button>
                 <div class="hidden prevent-animation" id="mobile-menu">
                     <ul>
-                        <li><a href="#" id="mobile-main-tab" class="block py-2 px-4 text-white">Halaman Utama</a></li>
-                        <li><a href="#" id="mobile-settings-tab" class="block py-2 px-4 text-white">Pengaturan</a></li>
-                        <li><a href="#" id="mobile-history-tab" class="block py-2 px-4 text-white">Riwayat Prediksi</a></li>
-                        <li><a href="{{ url_for('auth.logout') }}" id="mobile-logout-tab" class="block py-2 px-4 text-white">Logout</a></li>
+                        <li><a href="#" id="mobile-main-tab" class="block py-2 px-4 text-white">Halaman Utama</a>
+                        </li>
+                        <li><a href="#" id="mobile-settings-tab" class="block py-2 px-4 text-white">Pengaturan</a>
+                        </li>
+                        <li><a href="#" id="mobile-history-tab" class="block py-2 px-4 text-white">Riwayat
+                                Prediksi</a></li>
+                        <li><a href="{{ url_for('auth.logout') }}" id="mobile-logout-tab"
+                                class="block py-2 px-4 text-white">Logout</a></li>
                     </ul>
                 </div>
             </div>
         </nav>
     </header>
-    
+
     <!-- Main Content -->
     <div class="flex-grow flex flex-col items-center justify-center p-4">
         <div id="main-content" class="w-full max-w-2xl">
@@ -42,25 +49,63 @@
                 <button id="camera-tab" class="w-1/2 bg-blue-500 text-white py-2 px-4 rounded-t-lg">Kamera</button>
                 <button id="upload-tab" class="w-1/2 bg-gray-300 py-2 px-4 rounded-t-lg">Unggah</button>
             </div>
-            <div id="camera-container" class="flex flex-col items-center justify-center p-4 bg-white rounded-b-lg shadow-lg">
+            <div id="camera-container"
+                class="flex flex-col items-center justify-center p-4 bg-white rounded-b-lg shadow-lg">
                 <video id="camera" autoplay class="w-full rounded-lg shadow-lg mb-4"></video>
                 <div class="flex space-x-4">
-                    <button id="capture-button" class="bg-blue-500 text-white px-4 py-2 rounded shadow">Ambil Foto</button>
-                    <button id="switch-camera" class="bg-gray-500 text-white px-4 py-2 rounded shadow">Ganti Kamera</button>
+                    <button id="capture-button" class="bg-blue-500 text-white px-4 py-2 rounded shadow">Ambil
+                        Foto</button>
+                    <button id="switch-camera" class="bg-gray-500 text-white px-4 py-2 rounded shadow">Ganti
+                        Kamera</button>
                 </div>
             </div>
-            <div id="upload-container" class="hidden flex flex-col items-center justify-center p-4 bg-white rounded-b-lg shadow-lg">
+            <div id="upload-container"
+                class="hidden flex flex-col items-center justify-center p-4 bg-white rounded-b-lg shadow-lg">
                 <img id="file-preview" alt="Preview Gambar" class="w-full rounded-lg shadow-lg mb-4 hidden">
                 <input type="file" id="file-input" accept=".jpg,.jpeg,.png,.webp" class="mb-4">
                 <button id="upload-button" class="bg-blue-500 text-white px-4 py-2 rounded shadow">Unggah</button>
             </div>
-            <div id="result-container" class="hidden flex flex-col items-center justify-center p-4 bg-white rounded-lg shadow-lg mt-4">
+            <div id="result-container"
+                class="hidden flex flex-col items-center justify-center p-4 bg-white rounded-lg shadow-lg mt-4">
                 <img id="captured-image" alt="Gambar yang Diambil" class="w-full rounded-lg shadow-lg mb-4">
                 <p id="caption" class="text-lg font-semibold text-center mb-4"></p>
                 <div id="result-buttons" class="flex space-x-4">
-                    <button id="replay-caption-button" class="bg-green-500 text-white px-4 py-2 rounded shadow">Putar Ulang</button>
-                    <button id="stop-caption-button" class="bg-gray-500 text-white px-4 py-2 rounded shadow">Hentikan Suara</button>
+                    <button id="replay-caption-button" class="bg-green-500 text-white px-4 py-2 rounded shadow">Putar
+                        Ulang</button>
+                    <button id="stop-caption-button" class="bg-gray-500 text-white px-4 py-2 rounded shadow">Hentikan
+                        Suara</button>
                     <button id="close-button" class="bg-red-500 text-white px-4 py-2 rounded shadow">Tutup</button>
+                </div>
+            </div>
+            <div class="mt-8 text-center max-w-2xl">
+                <p>Selamat datang di SeeImg! Sistem ini memungkinkan Anda untuk mengambil gambar menggunakan kamera
+                    perangkat Anda atau mengunggah gambar dari penyimpanan lokal Anda. Sistem kemudian akan menghasilkan
+                    deskripsi (caption) yang menggambarkan isi gambar. Aplikasi ini khusus untuk gambar objek wisata di
+                    Purbalingga, seperti Owabong, Purbasari, Sanggaluri, Goa Lawa, dan D'Las. Untuk menggunakan kamera,
+                    klik tab "Kamera" dan ikuti petunjuk. Untuk mengunggah gambar, klik tab "Unggah", pilih file gambar,
+                    dan klik tombol "Unggah".</p>
+                <div id="sample-images" class="hidden mt-4">
+                    <p>Contoh Gambar:</p>
+                    <div class="flex justify-center space-x-4">
+                        <div class="text-center">
+                            <img src="{{ url_for('static', filename = 'images/sample1.jpg') }}" alt="Sample 1"
+                                class="w-32 h-32 object-cover cursor-pointer">
+                            <a href="{{ url_for('static', filename = 'images/sample1.jpg') }}" download
+                                class="block mt-2 text-blue-500">Unduh</a>
+                        </div>
+                        <div class="text-center">
+                            <img src="{{ url_for('static', filename = 'images/sample2.jpg') }}" alt="Sample 2"
+                                class="w-32 h-32 object-cover cursor-pointer">
+                            <a href="{{ url_for('static', filename = 'images/sample2.jpg') }}" download
+                                class="block mt-2 text-blue-500">Unduh</a>
+                        </div>
+                        <div class="text-center">
+                            <img src="{{ url_for('static', filename = 'images/sample3.jpg') }}" alt="Sample 3"
+                                class="w-32 h-32 object-cover cursor-pointer">
+                            <a href="{{ url_for('static', filename = 'images/sample3.jpg') }}" download
+                                class="block mt-2 text-blue-500">Unduh</a>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -90,25 +135,29 @@
             </table>
         </div>
     </div>
-    
     <!-- History Modal -->
-    <div id="history-modal" class="fixed inset-0 flex items-center justify-center hidden">
-        <div class="bg-white p-6 rounded-lg shadow-lg max-w-2xl w-full border" style="max-height: calc(100vh - 20px); overflow-y: auto;">
-            <button id="modal-close-button" class="absolute top-2 right-2 text-gray-600 hover:text-gray-900 focus:outline-none">
-                &times;
-            </button>
+    <div id="history-modal" class="fixed inset-0 flex items-center justify-center hidden z-50">
+        <div class="bg-white p-6 rounded-lg shadow-lg max-w-2xl w-full border relative"
+            style="max-height: calc(100vh - 20px); overflow-y: auto;">
             <h2 class="text-xl font-semibold mb-4">Detail Riwayat</h2>
             <img id="modal-image" alt="Gambar Riwayat" class="w-full rounded-lg shadow-lg mb-4">
             <p id="modal-caption" class="text-lg font-semibold text-center mb-4"></p>
             <div class="flex justify-between space-x-4">
-                <button id="modal-replay-caption" class="bg-green-500 text-white px-4 py-2 rounded shadow">Putar Ulang</button>
-                <button id="modal-stop-caption" class="bg-gray-500 text-white px-4 py-2 rounded shadow">Hentikan Suara</button>
+                <button id="modal-replay-caption" class="bg-green-500 text-white px-4 py-2 rounded shadow">Putar
+                    Ulang</button>
+                <button id="modal-stop-caption" class="bg-gray-500 text-white px-4 py-2 rounded shadow">Hentikan
+                    Suara</button>
                 <button id="modal-delete" class="bg-red-500 text-white px-4 py-2 rounded shadow">Hapus</button>
             </div>
+            <button id="modal-close-button"
+                class="absolute top-2 right-2 text-gray-600 hover:text-gray-900 focus:outline-none">
+                &times;
+            </button>
         </div>
     </div>
+
     {% endblock %}
-    
+
     {% block scripts %}
-        <script src="{{ url_for('static', filename='js/scripts_main.js') }}"></script>
+    <script src="{{ url_for('static', filename = 'js/scripts_main.js') }}"></script>
     {% endblock %}

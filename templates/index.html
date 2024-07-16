@@ -39,6 +39,26 @@
             </div>
         </div>
     </div>
+    <div class="mt-8 text-center max-w-2xl">
+        <p>Selamat datang di SeeImg! Sistem ini memungkinkan Anda untuk mengambil gambar menggunakan kamera perangkat Anda atau mengunggah gambar dari penyimpanan lokal Anda. Sistem kemudian akan menghasilkan deskripsi (caption) yang menggambarkan isi gambar. Aplikasi ini khusus untuk gambar objek wisata di Purbalingga, seperti Owabong, Purbasari, Sanggaluri, Goa Lawa, dan D'Las. Untuk menggunakan kamera, klik tab "Kamera" dan ikuti petunjuk. Untuk mengunggah gambar, klik tab "Unggah", pilih file gambar, dan klik tombol "Unggah".</p>
+        <div id="sample-images" class="hidden mt-4">
+            <p>Contoh Gambar:</p>
+            <div class="flex justify-center space-x-4">
+                <div class="text-center">
+                    <img src="{{ url_for('static', filename='images/sample1.jpg') }}" alt="Sample 1" class="w-32 h-32 object-cover cursor-pointer">
+                    <a href="{{ url_for('static', filename='images/sample1.jpg') }}" download class="block mt-2 text-blue-500">Unduh</a>
+                </div>
+                <div class="text-center">
+                    <img src="{{ url_for('static', filename='images/sample2.jpg') }}" alt="Sample 2" class="w-32 h-32 object-cover cursor-pointer">
+                    <a href="{{ url_for('static', filename='images/sample2.jpg') }}" download class="block mt-2 text-blue-500">Unduh</a>
+                </div>
+                <div class="text-center">
+                    <img src="{{ url_for('static', filename='images/sample3.jpg') }}" alt="Sample 3" class="w-32 h-32 object-cover cursor-pointer" onclick="setSampleImage('/static/images/sample3.jpg')">
+                    <a href="{{ url_for('static', filename='images/sample3.jpg') }}" download class="block mt-2 text-blue-500">Unduh</a>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}
 

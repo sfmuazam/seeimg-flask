@@ -37,6 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalStopCaption = document.getElementById('modal-stop-caption');
     const modalDelete = document.getElementById('modal-delete');
     const modalCloseButton = document.getElementById('modal-close-button');
+    const sampleImages = document.getElementById('sample-images');
 
     let currentStream;
     let useFrontCamera = true;
@@ -103,15 +104,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         });
+        closeHistoryModal();
     }
 
     mainTab.addEventListener('click', () => {
         setActiveTab('main');
+        switchMode('camera');
         mainContent.classList.remove('hidden');
         settingsContent.classList.add('hidden');
         historyContent.classList.add('hidden');
-        stopCamera();
-        initCamera();
     });
 
     settingsTab.addEventListener('click', () => {
@@ -134,12 +135,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     mobileMainTab.addEventListener('click', () => {
         setActiveTab('main');
+        switchMode('camera');
         mainContent.classList.remove('hidden');
         settingsContent.classList.add('hidden');
         historyContent.classList.add('hidden');
         mobileMenu.classList.add('hidden');
-        stopCamera();
-        initCamera();
     });
 
     mobileSettingsTab.addEventListener('click', () => {
@@ -217,51 +217,25 @@ document.addEventListener('DOMContentLoaded', () => {
     const constraints = {
         video: {
             facingMode: initialFacingMode,
-            width: { ideal: 1280 },
-            height: { ideal: 720 }
+            width: isMobileDevice() ? { ideal: 960 } : { ideal: 1280 },
+            height: isMobileDevice() ? { ideal: 1280 } : { ideal: 720 }
         }
     };
 
+    function isMobileDevice() {
+        return /Mobi|Android/i.test(navigator.userAgent);
+    }
+
     cameraTab.addEventListener('click', () => {
-        cameraContainer.classList.remove('hidden');
-        uploadContainer.classList.add('hidden');
-        resultContainer.classList.add('hidden');
-        cameraTab.classList.add('bg-blue-500', 'text-white', 'active');
-        cameraTab.classList.remove('bg-gray-300');
-        uploadTab.classList.add('bg-gray-300');
-        uploadTab.classList.remove('bg-blue-500', 'text-white', 'active');
-        stopSpeaking();
-        initCamera();
-        startSpeechRecognition();
+        switchMode('camera');
     });
 
     uploadTab.addEventListener('click', () => {
-        cameraContainer.classList.add('hidden');
-        uploadContainer.classList.remove('hidden');
-        resultContainer.classList.add('hidden');
-        uploadTab.classList.add('bg-blue-500', 'text-white', 'active');
-        uploadTab.classList.remove('bg-gray-300');
-        cameraTab.classList.add('bg-gray-300');
-        cameraTab.classList.remove('bg-blue-500', 'text-white', 'active');
-        stopSpeaking();
-        stopCamera();
-        stopSpeechRecognition();
-        fileInput.value = '';
-        filePreview.classList.add('hidden');
+        switchMode('upload');
     });
 
     fileInput.addEventListener('change', () => {
-        const file = fileInput.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = () => {
-                filePreview.src = reader.result;
-                filePreview.classList.remove('hidden');
-            };
-            reader.readAsDataURL(file);
-        } else {
-            filePreview.classList.add('hidden');
-        }
+        handleFileInput();
     });
 
     async function initCamera() {
@@ -282,6 +256,30 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     captureButton.addEventListener('click', async () => {
+        await captureImage();
+    });
+
+    switchCameraButton.addEventListener('click', () => {
+        toggleCamera();
+    });
+
+    uploadButton.addEventListener('click', () => {
+        handleUpload();
+    });
+
+    replayCaptionButton.addEventListener('click', () => {
+        speakCaption(caption.textContent);
+    });
+
+    stopCaptionButton.addEventListener('click', () => {
+        stopSpeaking();
+    });
+
+    closeButton.addEventListener('click', () => {
+        closeResultContainer();
+    });
+
+    async function captureImage() {
         disableButtons(true);
         captureButton.innerHTML = 'Memproses... <svg class="animate-spin h-5 w-5 text-white inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zM2 12a10 10 0 0110-10v2A8 8 0 004 12H2zm20 0a8 8 0 01-8 8v2c6.627 0 12-5.373 12-12h-4zm-2 0a10 10 0 01-10 10v-2a8 8 0 008-8h2z"></path></svg>';
 
@@ -297,20 +295,40 @@ document.addEventListener('DOMContentLoaded', () => {
         video.srcObject = null;
         video.poster = imageData;
 
-        await uploadImageAndGetCaption(imageData, 'camera');
+        try {
+            const captionText = await uploadAndGetCaption(imageData);
+            caption.textContent = captionText;
+            speakCaption(captionText);
+        } catch (error) {
+            showToastError('Terjadi kesalahan saat mengunggah gambar.');
+        }
 
         disableButtons(false);
         captureButton.innerHTML = 'Ambil Foto';
-    });
+    }
 
-    switchCameraButton.addEventListener('click', () => {
+    function toggleCamera() {
         useFrontCamera = !useFrontCamera;
         constraints.video.facingMode = useFrontCamera ? 'user' : 'environment';
         stopCamera();
         initCamera();
-    });
+    }
 
-    uploadButton.addEventListener('click', () => {
+    function handleFileInput() {
+        const file = fileInput.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = () => {
+                filePreview.src = reader.result;
+                filePreview.classList.remove('hidden');
+            };
+            reader.readAsDataURL(file);
+        } else {
+            filePreview.classList.add('hidden');
+        }
+    }
+
+    async function handleUpload() {
         const file = fileInput.files[0];
         if (!file) return;
 
@@ -328,60 +346,41 @@ document.addEventListener('DOMContentLoaded', () => {
             const imageData = reader.result;
             capturedImage.src = imageData;
 
-            await uploadImageAndGetCaption(imageData, 'upload');
+            try {
+                const captionText = await uploadAndGetCaption(imageData);
+                caption.textContent = captionText;
+                speakCaption(captionText);
+            } catch (error) {
+                showToastError('Terjadi kesalahan saat mengunggah gambar.');
+            }
 
             disableButtons(false);
             uploadButton.innerHTML = 'Unggah';
         };
         reader.readAsDataURL(file);
-    });
+    }
 
-    replayCaptionButton.addEventListener('click', () => {
-        speakCaption(caption.textContent);
-    });
+    async function uploadAndGetCaption(imageData) {
+        const formData = new FormData();
+        formData.append('file', dataURItoBlob(imageData), 'image.jpg');
 
-    stopCaptionButton.addEventListener('click', () => {
-        stopSpeaking();
-    });
+        const response = await fetch('/images', {
+            method: 'POST',
+            body: formData
+        });
 
-    closeButton.addEventListener('click', () => {
-        resultContainer.classList.add('hidden');
-        if (cameraTab.classList.contains('bg-blue-500')) {
-            cameraContainer.classList.remove('hidden');
-            initCamera();
-            startSpeechRecognition();
-        } else {
-            uploadContainer.classList.remove('hidden');
+        if (!response.ok) {
+            throw new Error('Failed to upload image');
         }
-        stopSpeaking();
-    });
 
-    async function uploadImageAndGetCaption(imageData, source) {
-        try {
-            const formData = new FormData();
-            formData.append('file', dataURItoBlob(imageData), 'image.jpg');
+        const data = await response.json();
+        const captionText = data.caption;
+        
+        cameraContainer.classList.add('hidden');
+        uploadContainer.classList.add('hidden');
+        resultContainer.classList.remove('hidden');
 
-            const response = await fetch('/images', {
-                method: 'POST',
-                body: formData
-            });
-
-            if (!response.ok) {
-                throw new Error(`Gagal mengunggah gambar: ${response.statusText}`);
-            }
-
-            const apiResponse = await response.json();
-            const captionText = apiResponse.caption;
-            caption.textContent = captionText;
-            speakCaption(captionText);
-
-            cameraContainer.classList.add('hidden');
-            uploadContainer.classList.add('hidden');
-            resultContainer.classList.remove('hidden');
-        } catch (error) {
-            console.error('Error:', error);
-            showToastError(`Terjadi kesalahan saat mengunggah gambar: ${error.message}`);
-        }
+        return captionText;
     }
 
     function dataURItoBlob(dataURI) {
@@ -547,4 +546,54 @@ document.addEventListener('DOMContentLoaded', () => {
             stopSpeaking();
         }
     });
+
+    function switchMode(mode) {
+        if (mode === 'camera') {
+            cameraContainer.classList.remove('hidden');
+            uploadContainer.classList.add('hidden');
+            resultContainer.classList.add('hidden');
+            cameraTab.classList.add('bg-blue-500', 'text-white', 'active');
+            cameraTab.classList.remove('bg-gray-300');
+            uploadTab.classList.add('bg-gray-300');
+            uploadTab.classList.remove('bg-blue-500', 'text-white', 'active');
+            sampleImages.classList.add('hidden');
+            stopSpeaking();
+            initCamera();
+            startSpeechRecognition();
+        } else if (mode === 'upload') {
+            cameraContainer.classList.add('hidden');
+            uploadContainer.classList.remove('hidden');
+            resultContainer.classList.add('hidden');
+            uploadTab.classList.add('bg-blue-500', 'text-white', 'active');
+            uploadTab.classList.remove('bg-gray-300');
+            cameraTab.classList.add('bg-gray-300');
+            cameraTab.classList.remove('bg-blue-500', 'text-white', 'active');
+            sampleImages.classList.remove('hidden');
+            stopSpeaking();
+            stopCamera();
+            stopSpeechRecognition();
+            fileInput.value = '';
+            filePreview.classList.add('hidden');
+        }
+    }
+
+    function closeResultContainer() {
+        resultContainer.classList.add('hidden');
+        if (cameraTab.classList.contains('bg-blue-500')) {
+            cameraContainer.classList.remove('hidden');
+            initCamera();
+            startSpeechRecognition();
+        } else {
+            uploadContainer.classList.remove('hidden');
+            sampleImages.classList.remove('hidden');
+            filePreview.classList.add('hidden');
+        }
+        stopSpeaking();
+    }
+
+    function closeHistoryModal() {
+        historyModal.classList.add('hidden');
+        document.body.style.overflow = 'auto';
+        stopSpeaking();
+    }
 });
