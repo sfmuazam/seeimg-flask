@@ -3,97 +3,112 @@
 {% block title %}SeeImg{% endblock %}
 
 {% block content %}
+
 <body class="bg-gray-100 flex flex-col min-h-screen">
-<!-- Navbar -->
-<nav class="bg-blue-500 text-white px-4 py-3 flex justify-between items-center">
-    <div class="text-lg font-semibold">SeeImg</div>
-    <div id="navbar-toggle" class="text-white focus:outline-none md:hidden">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
-        </svg>
-    </div>
-    <div id="navbar-menu" class="hidden w-full md:flex md:items-center md:w-auto mt-4 md:mt-0 space-y-2 md:space-y-0 md:space-x-4">
-        <a href="#" id="main-tab" class="block py-2 px-4 text-white">Halaman Utama</a>
-        <a href="#" id="settings-tab" class="block py-2 px-4 text-white">Pengaturan</a>
-        <a href="#" id="history-tab" class="block py-2 px-4 text-white">Riwayat Prediksi</a>
-        <a href="{{ url_for('auth.logout') }}" id="logout-tab" class="block py-2 px-4 text-white">Logout</a>
-    </div>
-</nav>
-
-<!-- Main Content -->
-<div class="flex-grow flex flex-col items-center justify-center p-4">
-    <div id="main-content" class="w-full max-w-2xl">
-        <div class="flex mb-4">
-            <button id="camera-tab" class="w-1/2 bg-blue-500 text-white py-2 px-4 rounded-t-lg">Kamera</button>
-            <button id="upload-tab" class="w-1/2 bg-gray-300 py-2 px-4 rounded-t-lg">Unggah</button>
-        </div>
-        <div id="camera-container" class="flex flex-col items-center justify-center p-4 bg-white rounded-b-lg shadow-lg">
-            <video id="camera" autoplay class="w-full rounded-lg shadow-lg mb-4"></video>
-            <div class="flex space-x-4">
-                <button id="capture-button" class="bg-blue-500 text-white px-4 py-2 rounded shadow">Ambil Foto</button>
-                <button id="switch-camera" class="bg-gray-500 text-white px-4 py-2 rounded shadow">Ganti Kamera</button>
+    <!-- Navbar -->
+    <header class="bg-blue-500 text-white px-4 py-3 flex justify-between items-center">
+        <nav class="flex justify-between items-center w-full">
+            <a href="#" class="text-lg font-semibold">SeeImg</a>
+            <ul id="desktop-menu" class="hidden md:flex gap-4 font-semibold">
+                <li><a href="#" id="main-tab" class="block py-2 px-4 text-white">Halaman Utama</a></li>
+                <li><a href="#" id="settings-tab" class="block py-2 px-4 text-white">Pengaturan</a></li>
+                <li><a href="#" id="history-tab" class="block py-2 px-4 text-white">Riwayat Prediksi</a></li>
+                <li><a href="{{ url_for('auth.logout') }}" id="logout-tab" class="block py-2 px-4 text-white">Logout</a></li>
+            </ul>
+            <div id="mobile-nav" class="dropdown md:hidden" data-open="false">
+                <button id="navbar-toggle" type="button">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-menu">
+                        <line x1="4" x2="20" y1="12" y2="12" />
+                        <line x1="4" x2="20" y1="6" y2="6" />
+                        <line x1="4" x2="20" y1="18" y2="18" />
+                    </svg>
+                </button>
+                <div class="hidden prevent-animation" id="mobile-menu">
+                    <ul>
+                        <li><a href="#" id="mobile-main-tab" class="block py-2 px-4 text-white">Halaman Utama</a></li>
+                        <li><a href="#" id="mobile-settings-tab" class="block py-2 px-4 text-white">Pengaturan</a></li>
+                        <li><a href="#" id="mobile-history-tab" class="block py-2 px-4 text-white">Riwayat Prediksi</a></li>
+                        <li><a href="{{ url_for('auth.logout') }}" id="mobile-logout-tab" class="block py-2 px-4 text-white">Logout</a></li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+    
+    <!-- Main Content -->
+    <div class="flex-grow flex flex-col items-center justify-center p-4">
+        <div id="main-content" class="w-full max-w-2xl">
+            <div class="flex mb-4">
+                <button id="camera-tab" class="w-1/2 bg-blue-500 text-white py-2 px-4 rounded-t-lg">Kamera</button>
+                <button id="upload-tab" class="w-1/2 bg-gray-300 py-2 px-4 rounded-t-lg">Unggah</button>
+            </div>
+            <div id="camera-container" class="flex flex-col items-center justify-center p-4 bg-white rounded-b-lg shadow-lg">
+                <video id="camera" autoplay class="w-full rounded-lg shadow-lg mb-4"></video>
+                <div class="flex space-x-4">
+                    <button id="capture-button" class="bg-blue-500 text-white px-4 py-2 rounded shadow">Ambil Foto</button>
+                    <button id="switch-camera" class="bg-gray-500 text-white px-4 py-2 rounded shadow">Ganti Kamera</button>
+                </div>
+            </div>
+            <div id="upload-container" class="hidden flex flex-col items-center justify-center p-4 bg-white rounded-b-lg shadow-lg">
+                <img id="file-preview" alt="Preview Gambar" class="w-full rounded-lg shadow-lg mb-4 hidden">
+                <input type="file" id="file-input" accept=".jpg,.jpeg,.png,.webp" class="mb-4">
+                <button id="upload-button" class="bg-blue-500 text-white px-4 py-2 rounded shadow">Unggah</button>
+            </div>
+            <div id="result-container" class="hidden flex flex-col items-center justify-center p-4 bg-white rounded-lg shadow-lg mt-4">
+                <img id="captured-image" alt="Gambar yang Diambil" class="w-full rounded-lg shadow-lg mb-4">
+                <p id="caption" class="text-lg font-semibold text-center mb-4"></p>
+                <div id="result-buttons" class="flex space-x-4">
+                    <button id="replay-caption-button" class="bg-green-500 text-white px-4 py-2 rounded shadow">Putar Ulang</button>
+                    <button id="stop-caption-button" class="bg-gray-500 text-white px-4 py-2 rounded shadow">Hentikan Suara</button>
+                    <button id="close-button" class="bg-red-500 text-white px-4 py-2 rounded shadow">Tutup</button>
+                </div>
             </div>
         </div>
-        <div id="upload-container" class="hidden flex flex-col items-center justify-center p-4 bg-white rounded-b-lg shadow-lg">
-            <img id="file-preview" alt="Preview Gambar" class="w-full rounded-lg shadow-lg mb-4 hidden">
-            <input type="file" id="file-input" accept=".jpg,.jpeg,.png,.webp" class="mb-4">
-            <button id="upload-button" class="bg-blue-500 text-white px-4 py-2 rounded shadow">Unggah</button>
+        <div id="settings-content" class="w-full max-w-2xl hidden p-4 bg-white rounded-lg shadow-lg">
+            <h2 class="text-xl font-semibold mb-4">Pengaturan</h2>
+            <div class="mb-4">
+                <label for="voice-select" class="block text-lg mb-2">Pilih Suara</label>
+                <select id="voice-select" class="w-full p-2 border rounded"></select>
+            </div>
+            <div class="mb-4">
+                <label for="test-text" class="block text-lg mb-2">Teks Uji</label>
+                <input type="text" id="test-text" class="w-full p-2 border rounded">
+            </div>
+            <button id="test-voice-button" class="bg-blue-500 text-white px-4 py-2 rounded shadow">Uji Suara</button>
         </div>
-        <div id="result-container" class="hidden flex flex-col items-center justify-center p-4 bg-white rounded-lg shadow-lg mt-4">
-            <img id="captured-image" alt="Gambar yang Diambil" class="w-full rounded-lg shadow-lg mb-4">
-            <p id="caption" class="text-lg font-semibold text-center mb-4"></p>
-            <div id="result-buttons" class="flex space-x-4">
-                <button id="replay-caption-button" class="bg-green-500 text-white px-4 py-2 rounded shadow">Putar Ulang</button>
-                <button id="stop-caption-button" class="bg-gray-500 text-white px-4 py-2 rounded shadow">Hentikan Suara</button>
-                <button id="close-button" class="bg-red-500 text-white px-4 py-2 rounded shadow">Tutup</button>
+        <div id="history-content" class="w-full max-w-5xl hidden p-4 bg-white rounded-lg shadow-lg">
+            <h2 class="text-xl font-semibold mb-4">Riwayat Prediksi</h2>
+            <table class="min-w-full bg-white border">
+                <thead>
+                    <tr>
+                        <th class="px-4 py-2">Gambar</th>
+                        <th class="px-4 py-2">Caption</th>
+                        <th class="px-4 py-2">Tanggal Unggah</th>
+                    </tr>
+                </thead>
+                <tbody id="history-table-body"></tbody>
+            </table>
+        </div>
+    </div>
+    
+    <!-- History Modal -->
+    <div id="history-modal" class="fixed inset-0 flex items-center justify-center hidden">
+        <div class="bg-white p-6 rounded-lg shadow-lg max-w-2xl w-full border" style="max-height: calc(100vh - 20px); overflow-y: auto;">
+            <button id="modal-close-button" class="absolute top-2 right-2 text-gray-600 hover:text-gray-900 focus:outline-none">
+                &times;
+            </button>
+            <h2 class="text-xl font-semibold mb-4">Detail Riwayat</h2>
+            <img id="modal-image" alt="Gambar Riwayat" class="w-full rounded-lg shadow-lg mb-4">
+            <p id="modal-caption" class="text-lg font-semibold text-center mb-4"></p>
+            <div class="flex justify-between space-x-4">
+                <button id="modal-replay-caption" class="bg-green-500 text-white px-4 py-2 rounded shadow">Putar Ulang</button>
+                <button id="modal-stop-caption" class="bg-gray-500 text-white px-4 py-2 rounded shadow">Hentikan Suara</button>
+                <button id="modal-delete" class="bg-red-500 text-white px-4 py-2 rounded shadow">Hapus</button>
             </div>
         </div>
     </div>
-    <div id="settings-content" class="w-full max-w-2xl hidden p-4 bg-white rounded-lg shadow-lg">
-        <h2 class="text-xl font-semibold mb-4">Pengaturan</h2>
-        <div class="mb-4">
-            <label for="voice-select" class="block text-lg mb-2">Pilih Suara</label>
-            <select id="voice-select" class="w-full p-2 border rounded"></select>
-        </div>
-        <div class="mb-4">
-            <label for="test-text" class="block text-lg mb-2">Teks Uji</label>
-            <input type="text" id="test-text" class="w-full p-2 border rounded">
-        </div>
-        <button id="test-voice-button" class="bg-blue-500 text-white px-4 py-2 rounded shadow">Uji Suara</button>
-    </div>
-    <div id="history-content" class="w-full max-w-5xl hidden p-4 bg-white rounded-lg shadow-lg">
-        <h2 class="text-xl font-semibold mb-4">Riwayat Prediksi</h2>
-        <table class="min-w-full bg-white border">
-            <thead>
-                <tr>
-                    <th class="px-4 py-2">Gambar</th>
-                    <th class="px-4 py-2">Caption</th>
-                    <th class="px-4 py-2">Tanggal Unggah</th>
-                </tr>
-            </thead>
-            <tbody id="history-table-body"></tbody>
-        </table>
-    </div>
-</div>
-
-<!-- History Modal -->
-<div id="history-modal" class="fixed inset-0 flex items-center justify-center hidden">
-    <div class="bg-white p-6 rounded-lg shadow-lg max-w-2xl w-full border" style="max-height: calc(100vh - 20px); overflow-y: auto;">
-        <button id="modal-close-button" class="absolute top-2 right-2 text-gray-600 hover:text-gray-900 focus:outline-none">
-            &times;
-        </button>
-        <h2 class="text-xl font-semibold mb-4">Detail Riwayat</h2>
-        <img id="modal-image" alt="Gambar Riwayat" class="w-full rounded-lg shadow-lg mb-4">
-        <p id="modal-caption" class="text-lg font-semibold text-center mb-4"></p>
-        <div class="flex justify-between space-x-4">
-            <button id="modal-replay-caption" class="bg-green-500 text-white px-4 py-2 rounded shadow">Putar Ulang</button>
-            <button id="modal-stop-caption" class="bg-gray-500 text-white px-4 py-2 rounded shadow">Hentikan Suara</button>
-            <button id="modal-delete" class="bg-red-500 text-white px-4 py-2 rounded shadow">Hapus</button>
-        </div>
-    </div>
-</div>
-{% endblock %}
-
-{% block scripts %}
-    <script src="{{ url_for('static', filename='js/scripts_main.js') }}"></script>
-{% endblock %}
+    {% endblock %}
+    
+    {% block scripts %}
+        <script src="{{ url_for('static', filename='js/scripts_main.js') }}"></script>
+    {% endblock %}

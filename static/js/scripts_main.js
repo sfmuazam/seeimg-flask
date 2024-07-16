@@ -1,9 +1,12 @@
 document.addEventListener('DOMContentLoaded', () => {
     const navbarToggle = document.getElementById('navbar-toggle');
-    const navbarMenu = document.getElementById('navbar-menu');
+    const mobileMenu = document.getElementById('mobile-menu');
     const mainTab = document.getElementById('main-tab');
     const settingsTab = document.getElementById('settings-tab');
     const historyTab = document.getElementById('history-tab');
+    const mobileMainTab = document.getElementById('mobile-main-tab');
+    const mobileSettingsTab = document.getElementById('mobile-settings-tab');
+    const mobileHistoryTab = document.getElementById('mobile-history-tab');
     const mainContent = document.getElementById('main-content');
     const settingsContent = document.getElementById('settings-content');
     const historyContent = document.getElementById('history-content');
@@ -60,10 +63,47 @@ document.addEventListener('DOMContentLoaded', () => {
 
         return `${utcDay} ${month} ${utcYear} ${utcHours}:${utcMinutes}:${utcSeconds}`;
     }
+    
+    // Dropdown toggle function
+    function toggleDropdown(event) {
+        const dropdown = event.target.closest('.dropdown');
+        const isOpen = dropdown.dataset.open === 'true';
+        dropdown.dataset.open = isOpen ? 'false' : 'true';
+        if (!isOpen) {
+            mobileMenu.classList.remove('hidden');
+        } else {
+            mobileMenu.classList.add('hidden');
+        }
+    }
 
-    navbarToggle.addEventListener('click', () => {
-        navbarMenu.classList.toggle('hidden');
+    navbarToggle.addEventListener('click', toggleDropdown);
+
+    window.addEventListener('click', (event) => {
+        const dropdown = document.querySelector('.dropdown[data-open="true"]');
+        if (dropdown && !dropdown.contains(event.target) && event.target !== navbarToggle) {
+            dropdown.dataset.open = 'false';
+            mobileMenu.classList.add('hidden');
+        }
     });
+
+    function setActiveTab(tab) {
+        const tabs = ['main', 'settings', 'history'];
+        tabs.forEach(t => {
+            const element = document.getElementById(`${t}-tab`);
+            const mobileElement = document.getElementById(`mobile-${t}-tab`);
+            if (t === tab) {
+                element.classList.add('bg-blue-700', 'text-white', 'active');
+                if (mobileElement) {
+                    mobileElement.classList.add('bg-blue-700', 'text-white', 'active');
+                }
+            } else {
+                element.classList.remove('bg-blue-700', 'active');
+                if (mobileElement) {
+                    mobileElement.classList.remove('bg-blue-700', 'active');
+                }
+            }
+        });
+    }
 
     mainTab.addEventListener('click', () => {
         setActiveTab('main');
@@ -92,17 +132,35 @@ document.addEventListener('DOMContentLoaded', () => {
         stopCamera();
     });
 
-    function setActiveTab(tab) {
-        const tabs = ['main', 'settings', 'history'];
-        tabs.forEach(t => {
-            const element = document.getElementById(`${t}-tab`);
-            if (t === tab) {
-                element.classList.add('bg-blue-700');
-            } else {
-                element.classList.remove('bg-blue-700');
-            }
-        });
-    }
+    mobileMainTab.addEventListener('click', () => {
+        setActiveTab('main');
+        mainContent.classList.remove('hidden');
+        settingsContent.classList.add('hidden');
+        historyContent.classList.add('hidden');
+        mobileMenu.classList.add('hidden');
+        stopCamera();
+        initCamera();
+    });
+
+    mobileSettingsTab.addEventListener('click', () => {
+        setActiveTab('settings');
+        mainContent.classList.add('hidden');
+        settingsContent.classList.remove('hidden');
+        historyContent.classList.add('hidden');
+        mobileMenu.classList.add('hidden');
+        populateVoiceList();
+        stopCamera();
+    });
+
+    mobileHistoryTab.addEventListener('click', () => {
+        setActiveTab('history');
+        mainContent.classList.add('hidden');
+        settingsContent.classList.add('hidden');
+        historyContent.classList.remove('hidden');
+        mobileMenu.classList.add('hidden');
+        populateHistoryTable();
+        stopCamera();
+    });
 
     function populateVoiceList() {
         if (typeof speechSynthesis === 'undefined') {
@@ -168,10 +226,10 @@ document.addEventListener('DOMContentLoaded', () => {
         cameraContainer.classList.remove('hidden');
         uploadContainer.classList.add('hidden');
         resultContainer.classList.add('hidden');
-        cameraTab.classList.add('bg-blue-500', 'text-white');
+        cameraTab.classList.add('bg-blue-500', 'text-white', 'active');
         cameraTab.classList.remove('bg-gray-300');
         uploadTab.classList.add('bg-gray-300');
-        uploadTab.classList.remove('bg-blue-500', 'text-white');
+        uploadTab.classList.remove('bg-blue-500', 'text-white', 'active');
         stopSpeaking();
         initCamera();
         startSpeechRecognition();
@@ -181,10 +239,10 @@ document.addEventListener('DOMContentLoaded', () => {
         cameraContainer.classList.add('hidden');
         uploadContainer.classList.remove('hidden');
         resultContainer.classList.add('hidden');
-        uploadTab.classList.add('bg-blue-500', 'text-white');
+        uploadTab.classList.add('bg-blue-500', 'text-white', 'active');
         uploadTab.classList.remove('bg-gray-300');
         cameraTab.classList.add('bg-gray-300');
-        cameraTab.classList.remove('bg-blue-500', 'text-white');
+        cameraTab.classList.remove('bg-blue-500', 'text-white', 'active');
         stopSpeaking();
         stopCamera();
         stopSpeechRecognition();

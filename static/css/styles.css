@@ -8,3 +8,148 @@ body {
     max-width: 100%;
     width: auto;
 }
+
+:root {
+    --background: 0 0% 100%;
+    --accent: 210 40% 96.1%;
+    --secondary: 210 40% 92%;
+    --foreground: 222.2 84% 4.9%;
+    --blue-light: 210 80% 75%;
+    --blue-dark: 210 80% 60%;
+    --white: 0 0% 100%;
+}
+
+[data-theme="dark"] {
+    --background: 222.2 84% 4.9%;
+    --accent: 222.2 40% 10%;
+    --secondary: 217.2 32.6% 17.5%;
+    --foreground: 210 40% 98%;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    html {
+        scroll-behavior: smooth;
+    }
+}
+
+* {
+    font-size: 1rem;
+    line-height: 1.5rem;
+}
+
+body {
+    position: relative;
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+body > header {
+    background-color: hsl(var(--background));
+    position: sticky;
+    top: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    max-height: 15vh;
+    width: 100%;
+    padding-inline: 2rem;
+    padding-block: 1.75rem;
+    backdrop-filter: blur(8px);
+    z-index: 10;
+}
+
+@media screen and (max-width: 500px) {
+    body > header {
+        padding-inline: 1rem;
+    }
+}
+
+header > nav {
+    display: flex;
+    flex-grow: 1;
+    justify-content: space-between;
+    align-items: center;
+}
+
+header > nav > a {
+    font-weight: 700;
+    font-size: x-large;
+    line-height: 1.75rem;
+}
+
+header > nav > ul {
+    display: flex;
+    gap: 1rem;
+    font-weight: 600;
+}
+
+.dropdown {
+    position: relative;
+}
+
+.dropdown button,
+.dropdown li {
+    padding: 0.5rem;
+    border-radius: 5px;
+    transition: color 0.5s ease-in-out, transform 0.1s ease-in-out;
+}
+
+.dropdown button:hover,
+.dropdown li:hover {
+    background-color: hsl(var(--blue-light));
+}
+
+.dropdown button:active,
+.dropdown li:active {
+    background-color: hsl(var(--blue-dark));
+    transform: scale(0.9, 0.9);
+}
+
+.dropdown > div > button {
+    display: flex;
+    gap: 0.5rem;
+    width: 100%;
+}
+
+.dropdown a {
+    display: block;
+    color: hsl(var(--white));
+}
+
+.dropdown > div {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    height: max-content;
+    min-width: 200px;
+    max-width: 100%;
+    background-color: hsl(var(--blue-light));
+    color: hsl(var(--white));
+    border-radius: 5px;
+    display: none;
+}
+
+.dropdown[data-open="true"] > div {
+    display: block;
+}
+
+.dropdown[data-open="false"] > div {
+    display: none;
+}
+
+@media screen and (max-width: 500px) {
+    header > nav > ul {
+        display: none;
+    }
+
+    #mobile-nav {
+        display: block;
+    }
+}
+
+button.active,
+.dropdown a.active {
+    background-color: hsl(var(--blue-dark));
+}
