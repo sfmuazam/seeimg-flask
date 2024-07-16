@@ -373,6 +373,10 @@ def correct_caption(caption):
         logger.error(f"Kesalahan saat mengoreksi caption: {str(e)}")
         return caption
 
+def remove_non_ascii(text):
+    # Menghapus semua karakter non-ASCII dari teks
+    return re.sub(r'[^\x00-\x7F]+', '', text)
+
 def get_gemini_caption(imgbb_url, corrected_caption):
     try:
         gemini_response = requests.get(
@@ -387,6 +391,7 @@ def get_gemini_caption(imgbb_url, corrected_caption):
             gemini_data = gemini_response.json()
             gemini_data = gemini_data.get('result', corrected_caption)
             result = re.sub(r'_([^_]*)_', r'\1', gemini_data)
+            result = remove_non_ascii(result)
             return result
         else:
             logger.error("Failed to get Gemini caption, using corrected caption")
