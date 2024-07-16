@@ -483,7 +483,11 @@ document.addEventListener('DOMContentLoaded', () => {
         modalCaption.textContent = item.predicted_caption;
         currentModalIndex = index;
         historyModal.classList.remove('hidden');
-        document.body.style.overflow = 'hidden'; 
+        document.body.style.overflow = 'hidden';
+        
+        if (window.innerWidth <= 768) { 
+            historyModal.style.paddingTop = '20%';
+        }
     };
 
     modalReplayCaption.addEventListener('click', () => {
