@@ -53,13 +53,13 @@ def upload_image():
         
         corrected_caption = correct_caption(caption)
         
-        # Konversi gambar ke format WebP dan simpan untuk penyimpanan yang efisien
+        # Konversi gambar ke format WebP dengan kompresi dan simpan untuk penyimpanan yang efisien
         webp_filename = f"{uuid.uuid4()}.webp"
         webp_file_path = os.path.join(upload_folder, webp_filename)
         
         with Image.open(original_file_path) as img:
             img = img.convert('RGB')
-            img.save(webp_file_path, format="webp")
+            img.save(webp_file_path, format="webp", quality=85, method=6)
         
         # Upload the image to Nyxs Uploader
         with open(original_file_path, 'rb') as f:
