@@ -59,7 +59,7 @@ def upload_image():
         
         with Image.open(original_file_path) as img:
             img = img.convert('RGB')
-            img.save(webp_file_path, format="webp", quality=85, method=6)
+            img.save(webp_file_path, format="webp", quality=65, method=6)
         
         # Upload the image to Nyxs Uploader
         with open(original_file_path, 'rb') as f:
