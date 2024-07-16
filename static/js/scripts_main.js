@@ -217,8 +217,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const constraints = {
         video: {
             facingMode: initialFacingMode,
-            width: isMobileDevice() ? { ideal: 960 } : { ideal: 1280 },
-            height: isMobileDevice() ? { ideal: 1280 } : { ideal: 720 }
+            width: isMobileDevice() ? { ideal: 1280 } : { ideal: 1280 },
+            height: isMobileDevice() ? { ideal: 960 } : { ideal: 720 }
         }
     };
 
