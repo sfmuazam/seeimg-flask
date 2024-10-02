@@ -44,12 +44,16 @@ Ensure you have the following installed on your machine:
     ```
 
 3. **Environment Setup**
-    Create a `.env` file with the following content:
+    Create a `.env` file by copying `.env.example`:
+    ```bash
+    cp .env.example .env
+    ```
+    Update your database credentials and other configurations in `.env`:
     ```bash
     SECRET_KEY=YOUR_SECRET_KEY
     DATABASE_URL=mysql+pymysql://username:password@host/db_name
     ```
-
+    
 4. **Import the Database**
     Use the `seeimg.sql` file to set up the database.
 
